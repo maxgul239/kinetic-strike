@@ -12,19 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup MSYS2 MinGW-w64 & Raylib
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-raylib
-
-      - name: Compile Standalone EXE
-        shell: msys2 {0}
+      - name: Download Official Raylib & Compile EXE
+        shell: powershell
         run: |
-          g++ main.cpp -o KineticStrike.exe -O3 -std=c++17 -static -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
+          $env:Path = "C:\msys64\mingw64\bin;C:\msys64\ucrt64\bin;" + $env:Path
+          curl.exe -L -s -o raylib.zip https://github.com/raysan5/raylib/releases/download/5.0/raylib-5.0_win64_mingw-w64.zip
+          Expand-Archive -Path raylib.zip -DestinationPath . -Force
+          g++ main.cpp -o KineticStrike.exe -O3 -std=c++17 -static -Iraylib-5.0_win64_mingw-w64/include -Lraylib-5.0_win64_mingw-w64/lib -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
 
       - name: Upload Playable Game Artifact
         uses: actions/upload-artifact@v4
